@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"name": "Sistemas Distribuidos",
+			"path": "..\\.."
+		},
+		{
+			"name": "C",
+			"path": "..\\..\\..\\C"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"locale.h": "c",
+			"stdio.h": "c",
+			"string.h": "c"
+		}
+	}
+}
