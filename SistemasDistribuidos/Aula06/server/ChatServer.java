@@ -1,112 +1,93 @@
-import java.io.*;// Requisições de entrada/saida
-import java.net.*;// conexões de rede (sockests)
-import java.util.*;// fins gerais
 
+import java.io.*; // requisições de entrada/saída
+import java.net.*; // conexões de rede (sockets)
+import java.util.*; // fins gerais
 
 public class ChatServer{
-    // Porta que ficará disponivel para o serviço 
-
+    // porta que ficará disponível para o serviço
     private final int port;
-    
-    // Lista dos usuarios conectados(Objetos Thread)
 
+    // lista dos usuários conectados
     private final Set<String> userNames = new HashSet<>();
 
-    // Lista dos Threads (Objetos Threads)
-
+    // lista dos Threads (objetos Thread)
     private final Set<UserThread> userThreads = new HashSet<>();
-
-    //contrutor
-
+    
+    // construtor
     public ChatServer(int port){
         this.port = port;
-
     }
 
     // método para executar o serviço (servidor)
-    // modo listening (escuta)
-
+    // modo listening (escutando)
     public void execute(){
-
         try(ServerSocket serverSocket = new ServerSocket(port)){
-            System.out.println("Server executing in port:" + port);
+
+            System.out.println("Server excuting in port: " + port);
             System.out.println("CTRL+C to finish");
-            
-            // Executando o serviço 
+
+            // executando o serviço
             while(true){
                 Socket socket = serverSocket.accept();
 
-                // Pegar o IP do Cliente
+                // pegar o IP do cliente
                 InetAddress ip = socket.getInetAddress();
-                System.out.println("New User Connect: [" + ip +"]");
+                System.out.println("New user connected: [" + ip + "]");
 
-                // Criar o thread dos usuarios
-
+                // criar o Thread dos usuários
+                UserThread newUser = new UserThread(socket, this);
+                userThreads.add(newUser);
+                newUser.start();
+                System.out.println(newUser);
             }
-        }catch (IOException ioex){
-            System.out.println("Server erro" + ioex.getMessage());
 
-
+        }catch(IOException ioex){
+            System.out.println("Server error " + ioex.getMessage());
         }
-
-    }   
+    }
 
     public static void main(String[] args) {
         if(args.length < 1){
             System.out.println("");
-            System.out.println(" To Execute, type");
+            System.out.println("To execute, type:");
             System.out.println("java ChatServer <port>");
-            System.out.println(" Eg. java ChatServer 9000");
+            System.out.println("Eg. java ChatServer 9000");
             System.out.println("");
-            System.exit(0);// Sai do programa sem gerar erro
+            System.exit(0); // sai do programa sem gerar erro
         }
+        
+        // vamos pegar o valor (a porta) e executar o serviço
+        int port = Integer.parseInt(args[0]); // converte String para inteiro
 
-        //1. O valor digitado e um numero ?
-        //2. Esta dentro de um intervalo ?(9001 até 9099)
-
-        // http: 80
-        // https: 443
-        // ftp: 21
-        //telnet: 23
-        //ssh: 22
-        //mysql: 3306
-        // sqlS: 1433
-        //Oracle: 1521
-        // Vamos pegar o valor (a porta) e executa o serviço
-        int port = Integer.parseInt(args[0]);//converte string para inteiro 
-        // instancia o servidor de chat
+        // instancia o Servidor de Chat
         ChatServer server = new ChatServer(port);
         server.execute();
     }
-    //Implementação de metodos auxiliares para manutenção do software 
 
+    // implementação de métodos auxiliares para a manutenção do software
     boolean hasUsers(){
         return !this.userNames.isEmpty();
     }
 
     Set<String> getUserNames(){
         return this.userNames;
-
     }
 
     public void addUserName(String userName){
         userNames.add(userName);
-
     }
 
     public void removeUser(String userName, UserThread aUser){
-        boolean removed = userName.remove(userName);
-        if(removed){
+        boolean removed = userNames.remove(userName);
+        if (removed){
             userThreads.remove(aUser);
-            System.out.println("User: " + userName + "exit.");
+            System.out.println("User: " + userName + " exit.");
         }
-
     }
 
-    //Envia uma mensagem de aviso para a "rede", comunicando a saida do User
+    // envia uma mensagem de aviso para a "rede", comunicando a saída od User
     public void broadcast(String serverMessage, UserThread excludeUser){
-        userThreads.stream().filter((aUser) -> (aUser != excludeUser)).forEachOrdered(
-        (aUser) -> aUser.sendMessage(serverMessage));
-
+        userThreads.stream().filter( (aUser) -> (aUser != excludeUser)).forEachOrdered( (aUser) -> aUser.sendMessage(serverMessage));
     }
 }
+
