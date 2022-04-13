@@ -23,7 +23,7 @@ public class ChatServer{
     public void execute(){
         try(ServerSocket serverSocket = new ServerSocket(port)){
 
-            System.out.println("Server excuting in port: " + port);
+            System.out.println("Server executing in port: " + port);
             System.out.println("CTRL+C to finish");
 
             // executando o serviço
